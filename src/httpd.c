@@ -11,6 +11,7 @@
 //chama o servidor passando o numero do socket
 void httpd(int connfd) {
 	char buffer[];
+	request req;
 
 	// Le o que está vindo no socket
 	// Termina quando recebe '\n'
@@ -19,7 +20,7 @@ void httpd(int connfd) {
 	// Faz o parse da requisicao analisando buffer
 	// Tratar GET ou POST
 	// 
-	parseBuffer(buffer);
+	req = parseRequest(buffer);
 
 	// Define diretorio base
 	// Verifica se existe
@@ -29,6 +30,7 @@ void httpd(int connfd) {
 	sendRes();
 
 }
+
 
 //le o socket e armazena no buffer
 void readSocket(char buffer[], int tam, int connfd)
@@ -57,7 +59,21 @@ void readSocket(char buffer[], int tam, int connfd)
 
 }
 
-char parseBuffer(char** buffer) {
+
+request parseRequest(char req[]) {
+	char *pBuffer;
+	request req;
+
+	pBuffer = strtok_r(req, " ", NULL);
+	if(!pBuffer) {
+		req.type = REQ_INVALID;
+		req.protocol = PROT_INVALID;
+		req.filePath[0] = '\0';
+		return req;
+	}
+
+	if(strcmp(pBuffer, GET) == 0)
+
 
 }
 
