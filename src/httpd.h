@@ -3,11 +3,5 @@
 * Alunos: Bruno Nunes Leal Faria - nUSP: 8765551
 *         Elaine Naomi Watanabe - nUSP: 8766722
 *
-* FILE: httpd.c
+* FILE: httpd.h
 */
-
-#include "httpd.h"
-
-void httpd(int connfd) {
-	
-}

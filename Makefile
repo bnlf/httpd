@@ -1,15 +1,14 @@
 CC=gcc
 CFLAGS=-c -Wall
-DEPS = httpd.h
-OBJ = httpd.o
+#DEPS = src/httpd.h
 
-all: httpd.c
+all: httpd
 
-%.o: %.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
+httpd: httpd.o
+	$(CC) httpd.o -o bin/httpd
 
-httpd: $(OBJ)
-	gcc -o $@ $^ $(CFLAGS)
+httpd.o: 
+	$(CC) $(CFLAGS) src/httpd.c 
 
 clean:
 	rm -f *.o httpd
