@@ -1,4 +1,4 @@
 httpd
 =====
 
-Simple httpd server
+Simple httpd server written in C
