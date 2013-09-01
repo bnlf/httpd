@@ -8,12 +8,13 @@
 
 #include "httpd.h"
 
+//chama o servidor passando o numero do socket
 void httpd(int connfd) {
 	char buffer[];
 
 	// Le o que está vindo no socket
 	// Termina quando recebe '\n'
-	readSocket(buffer, MAXLINE);
+	readSocket(buffer, MAXLINE, connfd);
 
 	// Faz o parse da requisicao analisando buffer
 	// Tratar GET ou POST
@@ -26,6 +27,33 @@ void httpd(int connfd) {
 
 	// Envia resposta ao cliente
 	sendRes();
+
+}
+
+//le o socket e armazena no buffer
+void readSocket(char buffer[], int tam, int connfd)
+{
+
+	char line;
+	int i = 0;
+		
+	while(i < tam && read(connfd, &line, 1))
+	{
+		if(line == '\r')
+		{
+			continue;
+		}	
+		else if(line == '\n')
+		{
+			break;
+		}	
+		else
+		{
+			buffer[i++] = line;
+		}
+	}
+	
+	buffer[i]= '\0';	
 
 }
 
