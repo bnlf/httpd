@@ -6,25 +6,6 @@
 * FILE: httpd.h
 */
 
-/*
- * Tipos de requisição HTTP: GET e POST
- */
-typedef enum {
-	GET,
-	POST,
-	REQ_INVALID
-} req_type;
-
-/*
-* Versões do protocolo HTTP
-*/
-typedef enum {
-	HTTP10,
-	HTTP11,
-	PROT_INVALID
-} req_proto;
-
-
 /**
 * Estrutura da requisição. 
 * @type req_type
@@ -32,7 +13,7 @@ typedef enum {
 * @protocol req_proto
 */
 typedef struct {
-	req_type type;
+	char *type;
 	char filePath[MAXLINE + 1];
-	req_proto protocol;
+	char *protocol;
 } request;

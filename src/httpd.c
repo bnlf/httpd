@@ -30,19 +30,42 @@ void httpd(int connfd) {
 
 }
 
-request parseRequest(char req[]) {
+request parseRequest(char buffer[]) {
 	char *pBuffer;
+	char *pBuffer2;
+	char *ptr = buffer;
 	request req;
 
-	pBuffer = strtok_r(req, " ", NULL);
+	pBuffer = strtok_r(ptr, " ", &pBuffer2);
 	if(!pBuffer) {
-		req.type = REQ_INVALID;
-		req.protocol = PROT_INVALID;
+		req.type = "INVALID";
+		req.protocol = "INVALID";
 		req.filePath[0] = '\0';
 		return req;
 	}
 
+	// Se HTTP Request = "GET" 
 	if(strcmp(pBuffer, GET) == 0)
+		req.type = "GET";
+	// Se HTTP Request = "POST"
+	else if (strcmp(pBuffer, "POST") == 0) 
+		req.type = "POST";
 
+	// PATH
+	strncpy(req.filePath, pBuffer, MAXLINE);
+	req.filePath[MAXLINE] = '\0';
+
+	// Verifica se ainda tem algo no buffer para ler
+	// pBuffer = strtok_r(buffer, " ", &pBuffer2);
+	// if(!pBuffer)
+	// 	return req;
+
+	// Se tiver, está sendo passado a versão do protocolo HTTP
+	if(strcmp(pBuffer, "HTTP/1.0") == 0)
+		req.protocolo = "HTTP/1.0";
+	else if	(strcmp(pBuffer, "HTTP/1.1") == 0)
+		req.protocolo = "HTTP/1.1";
+	
+	return req;
 }
 
