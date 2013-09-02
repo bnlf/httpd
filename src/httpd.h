@@ -20,9 +20,6 @@
 #include <arpa/inet.h>
 #include <ctype.h>
 
-// Testa se um char é um espaco em branco
-#define ISspace(x) isspace((int)(x))
-
 // Tamanho máximo de caracteres de entrada
 #define MAXLINE 4096
 
