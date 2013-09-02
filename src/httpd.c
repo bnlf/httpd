@@ -8,93 +8,108 @@
 
 #include "httpd.h"
 
-//chama o servidor passando o numero do socket
 void httpd(int connfd) {
-	char buffer[];
-	request req;
+
+	char buffer[MAXLINE]; // Buffer dos dados de input
+	request req; // Pedido do cliente
+	response res; // Resposta do servidor
+	struct stat st;
 
 	// Le o que está vindo no socket
-	// Termina quando recebe '\n'
 	readSocket(buffer, MAXLINE, connfd);
 
-	// Faz o parse da requisicao analisando buffer
-	// Tratar GET ou POST
-	// 
+	// Faz o parse da requisicao 
 	req = parseRequest(buffer);
 
-	printf(req);
-	// Define diretorio base
-	// Verifica se existe
+	// Verifica metodo
+	if(strcasecmp(req.method, "INVALID") == 0) {
+		res.status = 501; // Not Implemented
+	}
 
+	// Verifica Uri
+	// if(stat(req.uri, &st) == 0 && S_ISREG(st.st_mode)) {
+	// 	res.status = 200; // Ok
+	// 	res.fileName = req.uri;
+	// } else {
+	// 	res.status = 404; // File not Found
+	// 	strcat(res.fileName, "/404.html");
+	// }
+
+	// Verifica protocolo
+	if(strcasecmp(req.vProtocol, "INVALID") == 0) {
+		res.status = 501;
+		printf("501 - Protocolo não suportado\n");
+	} else {
+		res.vProtocol = req.vProtocol;
+	}
+
+	// DEBUG
+	// printf("%s %s %s\n", req.method, req.uri, req.vProtocol);
+	// printf("%d %s %s\n", res.status, res.fileName, res.vProtocol);
 
 	// Envia resposta ao cliente
-	sendRes();
+	// sendRes();
 
 }
 
-//le o socket e armazena no buffer
+/* le uma linha do socket e armazena no buffer
+* Params: 
+* 		@buffer buffer para salvar os dados de input
+* 		@tam tamanho do buffer
+*		@connfd descritor do socket
+*/			
 void readSocket(char buffer[], int tam, int connfd)
 {
-
+	// vars de suporte
 	char line;
 	int i = 0;
-		
+
 	while(i < tam && read(connfd, &line, 1))
 	{
-		if(line == '\r')
-		{
+		if(line == '\r') {
 			continue;
-		}	
-		else if(line == '\n')
-		{
+		}
+		// Termina se detectar \n (line feed)
+		else if(line == '\n') {
 			break;
 		}	
-		else
-		{
+		else {
 			buffer[i++] = line;
 		}
 	}
 	
 	buffer[i]= '\0';	
-
 }
 
 request parseRequest(char buffer[]) {
-	char *pBuffer;
-	char *pBuffer2;
 	char *ptr = buffer;
+	char method[MAXLINE], uri[MAXLINE], vProtocol[MAXLINE];
 	request req;
-
-	pBuffer = strtok_r(ptr, " ", &pBuffer2);
-	if(!pBuffer) {
-		req.type = "INVALID";
-		req.protocol = "INVALID";
-		req.filePath[0] = '\0';
-		return req;
-	}
-
-	// Se HTTP Request = "GET" 
-	if(strcmp(pBuffer, GET) == 0)
-		req.type = "GET";
-	// Se HTTP Request = "POST"
-	else if (strcmp(pBuffer, "POST") == 0) 
-		req.type = "POST";
-
-	// PATH
-	strncpy(req.filePath, pBuffer, MAXLINE);
-	req.filePath[MAXLINE] = '\0';
-
-	// Verifica se ainda tem algo no buffer para ler
-	// pBuffer = strtok_r(buffer, " ", &pBuffer2);
-	// if(!pBuffer)
-	// 	return req;
-
-	// Se tiver, está sendo passado a versão do protocolo HTTP
-	if(strcmp(pBuffer, "HTTP/1.0") == 0)
-		req.protocolo = "HTTP/1.0";
-	else if	(strcmp(pBuffer, "HTTP/1.1") == 0)
-		req.protocolo = "HTTP/1.1";
 	
+	sscanf(ptr, "%s %s %s", method, uri, vProtocol); 
+
+	// Somente GET ou POST
+	if(strcasecmp(method, "GET") == 0) 
+        req.method = "GET";
+ 	else if (strcasecmp(method, "POST") == 0) 
+        req.method = "POST";
+    else {
+    	req.method = "INVALID";
+		req.vProtocol = "INVALID";
+		req.uri[0] = '\0';
+		return req;
+    }
+
+    // Sera testado futuramente. Por enquanto aceita que é um uri valido
+    req.uri = uri;
+    
+    if(strcasecmp(vProtocol, "HTTP/1.0") == 0)
+		req.vProtocol = "HTTP/1.0";
+	else if	(strcasecmp(vProtocol, "HTTP/1.1") == 0)
+		req.vProtocol = "HTTP/1.1";
+    else
+    	req.vProtocol = "INVALID";
+
 	return req;
 }
 

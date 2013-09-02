@@ -6,9 +6,6 @@
 * FILE: httpd.h
 */
 
-<<<<<<< HEAD
-=======
-
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -21,41 +18,42 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <ctype.h>
 
-/*
- * Tipos de requisição HTTP: GET e POST
- */
-typedef enum {
-	GET,
-	POST,
-	REQ_INVALID
-} req_type;
+// Testa se um char é um espaco em branco
+#define ISspace(x) isspace((int)(x))
 
-/*
-* Versões do protocolo HTTP
-*/
-typedef enum {
-	HTTP10,
-	HTTP11,
-	PROT_INVALID
-} req_proto;
+// Tamanho máximo de caracteres de entrada
+#define MAXLINE 4096
 
+// Pasta raiz do servidor 
+#define WWW_ROOT "/www"
 
->>>>>>> d9d8ff380eed4587664049e5e4efdd5e6dbc964a
 /**
 * Estrutura da requisição. 
-* @type req_type
-* @filePath Caminho para o arquivo no servidor
-* @protocol req_proto
+* @method: Tipo de requisicao (GET/POST)
+* @uri: Endereco para arquivo no servidor
+* @vProtocol: Versao do protocolo HTTP
 */
 typedef struct {
-	char *type;
-	char filePath[MAXLINE + 1];
-<<<<<<< HEAD
-	char *protocol;
-} request;
-=======
-	req_proto protocol;
+	char *method;
+	char *uri;
+	char *vProtocol;
 } request;
 
->>>>>>> d9d8ff380eed4587664049e5e4efdd5e6dbc964a
+/**
+* Estrutura da resposta. 
+* @status: id do status de retorno
+* @vProtocol: Versao do protocolo HTTP
+* @fileName: Nome do arquivo em disco da requisicao
+*/
+typedef struct {
+	int status;
+	char *vProtocol;
+	char *fileName;
+} response;
+
+void readSocket(char buffer[], int tam, int connfd);
+
+request parseRequest(char buffer[]);
+
