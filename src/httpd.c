@@ -48,7 +48,7 @@ void httpd(int connfd) {
 	// printf("%d %s %s\n", res.status, res.fileName, res.vProtocol);
 
 	// Envia resposta ao cliente
-	// sendRes();
+	// sendRes(res);
 
 }
 

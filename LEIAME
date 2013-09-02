@@ -1,4 +1,14 @@
 LEIAME!
 
-Novo Leiame
+TO-DO
+======
+
+http.c
+- (29) Checar se o arquivo existe em verifica URI. Stat() não está retornando nada. Parece que o código está voando. Tem q debugar separado
+
+- Implementar POST
+- Implementar sendRes()
+- Implementar OPTIONS em sendRes()
+
+
 
