@@ -54,3 +54,5 @@ void readSocket(char buffer[], int tam, int connfd);
 
 request parseRequest(char buffer[]);
 
+void sendResponse(response res, int connfd);
+

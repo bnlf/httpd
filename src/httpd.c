@@ -62,7 +62,7 @@ void httpd(int connfd) {
 	printf("RESPOSTA: %d %s %s\n", res.status, res.fileName, res.vProtocol);
 
 	// Envia resposta ao cliente
-	// sendRes(res);
+	sendResponse(res, connfd);
 
 }
 
@@ -122,7 +122,23 @@ request parseRequest(char buffer[]) {
 	else if	(strcasecmp(vProtocol, "HTTP/1.1") == 0)
 		req.vProtocol = "HTTP/1.1";
     else
-    	req.vProtocol = "INVALID";
+    	req.vProtocol = "HTTP/1.1"; // se nao especificado
 
 	return req;
+}
+
+void sendResponse(response res, int connfd){
+	if (res.status == 501) // Não suportado
+		//returnErro(socket, html, status);
+
+	if (res.status == 404) // Arquivo não encontrado
+		//returnErro(socket, html, status);
+
+    if (res.status == 403) // Sem permissão rx
+		//returnErro(socket, html, status);
+
+	if (res.status == 200) { // Ok
+		// returns.n = open(returns.dir, O_RDONLY);
+		// sendFile(client.socket,returns);
+	}
 }
