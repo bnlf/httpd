@@ -1,14 +1,9 @@
 CC=gcc
-CFLAGS=-c -Wall
-#DEPS = src/httpd.h
+#CFLAGS=-c -Wall
+DIR=src
 
-all: httpd
-
-httpd: httpd.o
-	$(CC) httpd.o -o bin/httpd
-
-httpd.o: 
-	$(CC) $(CFLAGS) src/httpd.c 
+all: 
+	$(CC) $(CFLAGS) $(DIR)/httpd.c $(DIR)/main.c -o bin/httpd
 
 clean:
 	rm -f *.o httpd
