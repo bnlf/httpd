@@ -26,14 +26,19 @@ void httpd(int connfd) {
 		res.status = 501; // Not Implemented
 	}
 
-	// Verifica Uri
-	// if(stat(req.uri, &st) == 0 && S_ISREG(st.st_mode)) {
-	// 	res.status = 200; // Ok
-	// 	res.fileName = req.uri;
-	// } else {
-	// 	res.status = 404; // File not Found
-	// 	strcat(res.fileName, "/404.html");
-	// }
+	// Se raiz, concatena com index.html 
+	if(strcasecmp(req.uri[streln(req.uri)-1], "/") {
+		strcat(req.uri,"index.html");
+	}
+		
+	// Verifica se arquivo existe no servidor
+	if(stat(req.uri, &st) == -1) {
+		res.status = 404; // File not Found
+		res.fileName = "/404.html"; // 404 html file
+	} else {
+		res.status = 200; // ok
+		res.fileName = req.uri;
+	}
 
 	// Verifica protocolo
 	if(strcasecmp(req.vProtocol, "INVALID") == 0) {
@@ -44,8 +49,8 @@ void httpd(int connfd) {
 	}
 
 	// DEBUG
-	// printf("%s %s %s\n", req.method, req.uri, req.vProtocol);
-	// printf("%d %s %s\n", res.status, res.fileName, res.vProtocol);
+	printf("%s %s %s\n", req.method, req.uri, req.vProtocol);
+	printf("%d %s %s\n", res.status, res.fileName, res.vProtocol);
 
 	// Envia resposta ao cliente
 	// sendRes(res);
@@ -113,3 +118,57 @@ request parseRequest(char buffer[]) {
 	return req;
 }
 
+void httpHeader(int client_socket,char *mimeType, int tamanho, time_t ultAtu, int request_check, char *check_type) {
+
+    /* Preparando a data e hora */
+	time_t agora;
+	char bufHora[128];
+	char buffer[100];
+
+    /* Preparando o protocolo */
+	sprintf(buffer, "%s %d %s\r\n", PROTOCOLO, request_check,check_type);
+	write(client_socket, buffer, strlen(buffer));
+
+    /* Preparando o nome do servidor */
+	sprintf(buffer, "Server: %s\r\n", SERVERNAME);
+	write(client_socket, buffer, strlen(buffer));
+
+    /* Preparando a data/hota */
+	agora = time(NULL);
+	strftime(bufHora, sizeof(bufHora), RFC1123, gmtime(&agora));
+    sprintf(buffer, "Date: %s\r\n", bufHora);
+	write(client_socket, buffer, strlen(buffer));
+
+    /* Preparando o tipo de conteúdo */
+	sprintf(buffer, "Content-Type: %s\r\n", mimeType);
+	write(client_socket, buffer, strlen(buffer));
+
+    /* Preparando o tamanho */
+	if (tamanho >= 0) {
+		sprintf(buffer, "Content-Length: %d\r\n", tamanho);
+		write(client_socket, buffer, strlen(buffer));
+	}
+
+    /* Preparando a data/hora da última modificação para efeitos de cache */
+	if (ultAtu != -1){
+		strftime(bufHora, sizeof(bufHora), RFC1123, gmtime(&ultAtu));
+		sprintf(buffer, "Last-Modified: %s\r\n", bufHora);
+		write(client_socket, buffer, strlen(buffer));
+   	}
+
+    /* Enviando linha em branco para finalizar o cabeçalho */
+	write(client_socket, "\r\n", 2);
+}
+
+// Verifica mime types
+char *get_mime_type(char *name){
+	char *ext = strrchr(name, '.');
+	if (!ext) return NULL;
+	if (strcmp(ext, ".html") == 0 || strcmp(ext, ".htm") == 0) return "text/html";
+	if (strcmp(ext, ".jpg") == 0 || strcmp(ext, ".jpeg") == 0) return "image/jpeg";
+	if (strcmp(ext, ".png") == 0) return "image/png";
+	if (strcmp(ext, ".css") == 0) return "text/css";
+	if (strcmp(ext, ".avi") == 0) return "video/x-msvideo";
+	if (strcmp(ext, ".mpeg") == 0 || strcmp(ext, ".mpg") == 0) return "video/mpeg";
+	return NULL;
+}
