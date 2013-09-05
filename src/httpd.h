@@ -26,6 +26,9 @@
 // Pasta raiz do servidor 
 #define WWW_ROOT "www"
 
+// Nome do servidor
+#define SERVERNAME "ManoServer 1.0"
+
 /**
 * Estrutura da requisição. 
 * @method: Tipo de requisicao (GET/POST)
@@ -50,9 +53,16 @@ typedef struct {
 	char *fileName;
 } response;
 
-void readSocket(char buffer[], int tam, int connfd);
+int readSocket(char buffer[], int tam, int connfd);
 
 request parseRequest(char buffer[]);
 
-void sendResponse(response res, int connfd);
+int sendResponse(request req, response res, int connfd);
 
+int sendFile(request req, response res, int connfd);
+
+int sendHeader(int connfd, request req, response res, char *msgStatus, char *mimeType);
+
+char *identifyMimeType(char *name);
+
+int sendErrorMessage(int status, request req, response res, char *message, int connfd);

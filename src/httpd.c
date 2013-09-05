@@ -10,17 +10,21 @@
 
 void httpd(int connfd) {
 
+                     
 	char buffer[MAXLINE]; // Buffer dos dados de input
 	char fileBuffer[MAXLINE];
 	request req; // Pedido do cliente
 	response res; // Resposta do servidor
 	struct stat st;
+	int n;
 
 	// Le o que está vindo no socket
-	readSocket(buffer, MAXLINE, connfd);
+	n=read(connfd, buffer, MAXLINE);
 
 	// Faz o parse da requisicao 
 	req = parseRequest(buffer);
+
+
 
 	// Verifica metodo
 	if(strcasecmp(req.method, "INVALID") == 0) {
@@ -62,37 +66,10 @@ void httpd(int connfd) {
 	printf("RESPOSTA: %d %s %s\n", res.status, res.fileName, res.vProtocol);
 
 	// Envia resposta ao cliente
-	sendResponse(res, connfd);
+	sendResponse(req, res, connfd);
 
-}
 
-/* le uma linha do socket e armazena no buffer
-* Params: 
-* 		@buffer buffer para salvar os dados de input
-* 		@tam tamanho do buffer
-*		@connfd descritor do socket
-*/			
-void readSocket(char buffer[], int tam, int connfd)
-{
-	// vars de suporte
-	char line;
-	int i = 0;
 
-	while(i < tam && read(connfd, &line, 1))
-	{
-		if(line == '\r') {
-			continue;
-		}
-		// Termina se detectar \n (line feed)
-		else if(line == '\n') {
-			break;
-		}	
-		else {
-			buffer[i++] = line;
-		}
-	}
-	
-	buffer[i]= '\0';	
 }
 
 request parseRequest(char buffer[]) {
@@ -127,18 +104,179 @@ request parseRequest(char buffer[]) {
 	return req;
 }
 
-void sendResponse(response res, int connfd){
+int sendResponse(request req,response res, int connfd){
+
 	if (res.status == 501) // Não suportado
-		//returnErro(socket, html, status);
-
-	if (res.status == 404) // Arquivo não encontrado
-		//returnErro(socket, html, status);
-
-    if (res.status == 403) // Sem permissão rx
-		//returnErro(socket, html, status);
-
-	if (res.status == 200) { // Ok
-		// returns.n = open(returns.dir, O_RDONLY);
-		// sendFile(client.socket,returns);
+	{
+		//"Not Implemented"
+		return sendErrorMessage(res.status, req, res, "Not Implemented", connfd);
+	}	
+	else if(res.status == 403)
+	{
+		//"Forbidden";
+		return sendErrorMessage(res.status, req, res, "Forbidden", connfd);
 	}
+	else if (res.status == 404) // Arquivo não encontrado
+	{
+		//"Page not found";
+		return sendErrorMessage(res.status, req, res, "Page not found", connfd);
+	} 
+	else if (res.status == 200 ) // Ok
+	{ 
+		return sendFile(req, res,connfd);
+	}
+	else
+	{
+		//"500 Internal Server Error" - default
+		return sendErrorMessage(500, req, res, "Internal Server Error", connfd);
+	}
+
+
+	return 0;
+}
+
+int sendErrorMessage(int status, request req, response res, char *message, int connfd){
+
+	char buffer[MAXLINE];
+
+	//envia o header com o numero do erro
+	sendHeader(connfd, req, res, message, "text/html");
+
+	//envia o html para que o usuario visualize a mensagem no navegador
+	sprintf(buffer, "<html><head><title>Error</title></head>");
+	write(connfd, buffer, strlen(buffer));
+
+	sprintf(buffer, "<body><h1>%s says: error %d</h1><p>%s</p></body>", SERVERNAME,res.status, message);
+	write(connfd, buffer, strlen(buffer));
+
+	return 1;
+}
+
+
+
+int sendFile(request req, response res, int connfd){
+
+	//Abre o arquivo
+	FILE *clientFile = fopen(res.fileName, "r");
+
+
+	//Verifica a permissao do arquivo
+	if(!clientFile)
+	{
+		res.status = 403;
+		return sendErrorMessage(res.status,req,  res, "Forbidden", connfd);
+	}
+	else
+	{
+		int size;
+		char buffer[MAXLINE];
+
+
+		sendHeader(connfd, req, res, "OK", identifyMimeType(res.fileName));
+
+		while(!feof(clientFile)){
+			size = fread(buffer, 1, MAXLINE, clientFile);
+			write(connfd, buffer, size);
+		}
+
+		fclose(clientFile);
+	}
+
+}
+
+int sendHeader(int connfd, request req, response res, char *msgStatus, char *mimeType){
+
+
+
+
+
+
+	char bufferHeader[100];
+
+
+	//Envia a primeira linha, com o Protocolo, o Status e a Msg do Status
+	sprintf(bufferHeader, "%s %d %s\r\n", res.vProtocol, res.status,msgStatus);
+	write(connfd, bufferHeader, strlen(bufferHeader));
+
+	printf("%s\n",bufferHeader );
+
+	//Envia o nome do servidor
+	sprintf(bufferHeader, "Server: %s\r\n", SERVERNAME);
+	write(connfd, bufferHeader, strlen(bufferHeader));
+
+	printf("%s\n",bufferHeader );
+
+	//Configura data e hora
+	time_t now;
+	char bufHour[128];
+
+	now = time(NULL);
+	strftime(bufHour, sizeof(bufHour), "%a, %d %b %Y %H:%M:%S GMT"	, gmtime(&now));
+
+	//Envia a data e hora
+	sprintf(bufferHeader, "Date: %s\r\n", bufHour);
+	write(connfd, bufferHeader, strlen(bufferHeader));
+
+	printf("%s\n",bufferHeader );
+
+	//Envia o tipo de conteudo
+	sprintf(bufferHeader, "Content-Type: %s;\r\n", mimeType);
+	write(connfd, bufferHeader, strlen(bufferHeader));
+
+	printf("%s\n",bufferHeader );
+
+
+	struct stat infoFileRequest;
+
+	if(	strcasecmp(req.method, "GET") == 0 && 
+		res.status == 200 && stat(res.fileName, &infoFileRequest) == 0 )
+	{
+		
+		// Envia content-length
+		sprintf(bufferHeader, "Content-Length: %d\r\n", (int) infoFileRequest.st_size);
+		write(connfd, bufferHeader, strlen(bufferHeader));
+
+		printf("%s\n",bufferHeader );
+
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+	// Avisa que a conexao foi fechada
+	sprintf(bufferHeader, "Connection: close\r\n");
+	write(connfd, bufferHeader, strlen(bufferHeader));
+
+	printf("%s\n",bufferHeader );
+
+	//Finaliza o cabecalho enviando uma linha em branco
+	write(connfd, "\r\n", 2);
+
+
+
+
+
+	return 0;
+}
+
+
+char *identifyMimeType(char *name){
+
+	char *ext = strrchr(name, '.');
+	if (!ext) return NULL;
+	if (strcmp(ext, ".html") == 0 || strcmp(ext, ".htm") == 0) return "text/html";
+	if (strcmp(ext, ".png") == 0) return "image/png";
+	if (strcmp(ext, ".jpg") == 0 || strcmp(ext, ".jpeg") == 0) return "image/jpeg";
+	if (strcmp(ext, ".gif") == 0) return "image/gif";	
+	if (strcmp(ext, ".css") == 0) return "text/css";
+
+	return NULL;
 }
