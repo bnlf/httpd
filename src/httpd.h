@@ -24,7 +24,7 @@
 #define MAXLINE 4096
 
 // Pasta raiz do servidor 
-#define WWW_ROOT "/www"
+#define WWW_ROOT "www"
 
 /**
 * Estrutura da requisição. 
