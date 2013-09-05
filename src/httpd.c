@@ -52,7 +52,6 @@ void httpd(int connfd) {
 	// Verifica protocolo
 	if(strcasecmp(req.vProtocol, "INVALID") == 0) {
 		res.status = 501;
-		printf("501 - Protocolo não suportado\n");
 	} else {
 		res.vProtocol = req.vProtocol;
 	}
