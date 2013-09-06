@@ -1,3 +1,64 @@
+/*
+* MAC0448/5910 - Programação para Redes de Computadores - EP1 @ 2013.2
+* Alunos: Bruno Nunes Leal Faria - nUSP: 8765551
+* Elaine Naomi Watanabe - nUSP: 8766722
+*
+* FILE: LEIAME
+*/
 
+Instrucoes
+==============
 
+Para compilar todos os arquivos necessarios
+$make all
+Para remover arquivos objetos criados durante a compilacao
+$make clean
 
+Um arquivo executavel sera criado na raiz do diretorio.
+
+Executar
+==============
+
+Digite './httpd <porta>' para executar
+
+PARAMETRO:
+  @porta Porta que o servidor sera iniciado (nao pode estar em uso e deve ser > 1024)
+  
+Exemplo: $./httpd 8080
+
+WWW Root
+==============
+
+A pasta /www contem os arquivos do servidor web
+  
+Teste
+==============
+
+GET:
+Acesse o endereco http://127.0.0.1:<porta> pelo navegador
+Sera feito uma requisicao GET para o arquivo raiz do servidor web. Como nenhum arquivo html foi passado, sera
+retornado o arquivo index.html (arquivos exemplo de teste que contem uma imagem)
+
+POST:
+Acesse o endereco http://127.0.0.1:<porta>/form-example.html pelo navegador
+Faca a submissao do formulario para verificar a troca de dados entre o cliente e o servidor. Se houver sucesso,
+o servidor retornara os parametros do formulario como reposta
+
+HTTP OPTIONS:
+Para efetuar o teste dos parametros http, basta requisitar o acesso via telnet para o servidor.
+$telnet 127.0.0.1 <porta>
+<parametros>
+
+Para finalizar, basta pressionar a tecla enter 2 vezes. Quando detectado \n (nova linha), a conexao sera fechada.
+
+404 - Page not found:
+Em caso de pedido a uma pagina que nao existe no servidor, ele respondera com a pagina 404.html e status 404. 
+
+501 - Not implemented:
+Em caso de pedido utilizando um protocolo ou metodo nao suportado, a conexao sera fechada retornando que nao
+ha suporte para o protocolo.
+
+Descricao
+==============
+
+Ver arquivo http.h para descritores das funcoes 
