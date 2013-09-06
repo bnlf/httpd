@@ -6,4 +6,7 @@ all:
 	$(CC) $(CFLAGS) $(DIR)/httpd.c $(DIR)/main.c -o httpd
 
 clean:
-	rm -f *.o httpd
+	rm -f *.o
+	
+remove:
+	rm -f *o httpd
