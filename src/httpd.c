@@ -18,7 +18,6 @@ void httpd(int connfd) {
 	struct stat st;
 	int n;
 	int sizeContent = -1;
-	
 
 	// Le o que está vindo no socket
 	n=read(connfd, buffer, MAXLINE);
@@ -28,7 +27,6 @@ void httpd(int connfd) {
 	int statusRead = 0;
 	strcpy(options, buffer);
 
-	
 	while(statusRead == 0)
 	{
 		if((options[i-3] == '\n' && options[i-1] == '\n') || options[i-1] != '\n')
@@ -44,37 +42,19 @@ void httpd(int connfd) {
 
 			if(options[0] == '\r' && options[1] == '\n' && n == 2)
 				statusRead = 1;
-
-
 		}
 	}
 
-
-	
-
 	// Faz o parse da requisicao 
 	req = parseRequest(buffer);
-
 
 	char *linePost;
 
 	//Encontra no buffer o tamanho do conteudo	
 	if(strcmp(req.method, "POST") ==0)
 	{
-
 		linePost = getLastLineRead(buffer);
-		
-	
 	}	
-	
-	
-
-	
-
-
-	
-
-
 
 	// Verifica metodo
 	if(strcasecmp(req.method, "INVALID") == 0) {
@@ -114,11 +94,8 @@ void httpd(int connfd) {
 	printf("PEDIDO: %s %s %s\n", req.method, req.uri, req.vProtocol);
 	printf("RESPOSTA: %d %s %s\n", res.status, res.fileName, res.vProtocol);
 
-
 	// Envia resposta ao cliente
 	sendResponse(req, res, connfd, linePost);
-
-
 
 }
 
@@ -183,11 +160,6 @@ int sendResponse(request req,response res, int connfd, char *linePost){
 		//"Not Implemented"
 		return sendErrorMessage(res.status, req, res, "Not Implemented", connfd);
 	}	
-	else if(res.status == 403)
-	{
-		//"Forbidden";
-		return sendErrorMessage(res.status, req, res, "Forbidden", connfd);
-	}
 	else if (res.status == 404) // Arquivo não encontrado
 	{
 		//"Page not found";
@@ -228,17 +200,13 @@ int sendPostMessage(request req, response res, int connfd, char *linePost){
 
 	char buffer[MAXLINE];
 	
-
 	//Prepara cabecalho HTML
 	sprintf(buffer, "<html><head><title>Submitted Form</title></head>");
 	
 	//Cria body
 	strcat(buffer, "<body><h1>Received variables</h1><br><table>");
-	
 
 	strcat(buffer, "<tr><th>Variables</th><th>Values</th></tr>");
-	
-
 	
   	char * pch;
   	char temp[250];
@@ -247,9 +215,6 @@ int sendPostMessage(request req, response res, int connfd, char *linePost){
 
 	while (pch != NULL)
 	{
-		
-
-
 		sprintf(temp, "<tr><td>%s</td>", pch);
 		strcat(buffer, temp);
 
@@ -262,17 +227,8 @@ int sendPostMessage(request req, response res, int connfd, char *linePost){
 
 	}
 
-
-
-
-
-	
-
 	//Fecha body e html
 	strcat(buffer, "</table></body></html>");
-	
-
-
 
 	sendHeader(connfd, req, res, "OK", "text/html");
 
@@ -281,13 +237,10 @@ int sendPostMessage(request req, response res, int connfd, char *linePost){
 	return 0;
 }
 
-
-
 int sendFile(request req, response res, int connfd){
 
 	//Abre o arquivo
 	FILE *clientFile = fopen(res.fileName, "r");
-
 
 	//Verifica a permissao do arquivo
 	if(!clientFile)
@@ -299,7 +252,6 @@ int sendFile(request req, response res, int connfd){
 	{
 		int size;
 		char buffer[MAXLINE];
-
 
 		sendHeader(connfd, req, res, "OK", identifyMimeType(res.fileName));
 
@@ -315,13 +267,7 @@ int sendFile(request req, response res, int connfd){
 
 int sendHeader(int connfd, request req, response res, char *msgStatus, char *mimeType){
 
-
-
-
-
-
 	char bufferHeader[100];
-
 
 	//Envia a primeira linha, com o Protocolo, o Status e a Msg do Status
 	sprintf(bufferHeader, "%s %d %s\r\n", res.vProtocol, res.status,msgStatus);
@@ -354,32 +300,17 @@ int sendHeader(int connfd, request req, response res, char *msgStatus, char *mim
 
 	//printf("%s\n",bufferHeader );
 
-
 	struct stat infoFileRequest;
 
 	if(	strcasecmp(req.method, "GET") == 0 && 
 		res.status == 200 && stat(res.fileName, &infoFileRequest) == 0 )
 	{
-		
 		// Envia content-length
 		sprintf(bufferHeader, "Content-Length: %d\r\n", (int) infoFileRequest.st_size);
 		write(connfd, bufferHeader, strlen(bufferHeader));
 
 		//printf("%s\n",bufferHeader );
-
 	}
-
-
-
-
-
-
-
-
-
-
-
-
 
 	// Avisa que a conexao foi fechada
 	sprintf(bufferHeader, "Connection: close\r\n");
@@ -389,10 +320,6 @@ int sendHeader(int connfd, request req, response res, char *msgStatus, char *mim
 
 	//Finaliza o cabecalho enviando uma linha em branco
 	write(connfd, "\r\n", 2);
-
-
-
-
 
 	return 0;
 }
@@ -407,16 +334,13 @@ char *getLastLineRead(char *buffer) {
     int i = 0;
     int j = 0;
 
-
     for (i=0;i<bufSize;i++) {
         if (buffer[i]=='\n') {
             numLines++;
         }
     }
 
-
     int *vetPositionLine = (int*) malloc(numLines);
-
    
     for (i=0;i<bufSize;i++) {
         if (buffer[i]=='\n') {
@@ -424,7 +348,6 @@ char *getLastLineRead(char *buffer) {
             j++;            
         }
     }
-
 
     start = vetPositionLine[numLines-3];
     end = vetPositionLine[numLines-1];

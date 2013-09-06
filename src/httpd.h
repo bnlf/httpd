@@ -27,7 +27,7 @@
 #define WWW_ROOT "www"
 
 // Nome do servidor
-#define SERVERNAME "ManoServer 1.0"
+#define SERVERNAME "Mano Server 1.0"
 
 /**
 * Estrutura da requisição. 
