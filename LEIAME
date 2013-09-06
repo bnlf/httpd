@@ -7,8 +7,32 @@ http.c
 - (29) Checar se o arquivo existe em verifica URI. Stat() não está retornando nada. Parece que o código está voando. Tem q debugar separado
 
 - Implementar POST
+Por enquanto, só está sendo tratado que tipo de requisição está vindo na primeira linha (que é a linha do request em si). As outras linhas são parametros passados no header da requisicao.
+
+No caso do post, veja que eu detecto o tipo de request no parserequest
+
+if(strcasecmp(method, "GET") == 0) 
+        req.method = "GET";
+ 	else if (strcasecmp(method, "POST") == 0) 
+        req.method = "POST";
+    else {
+    	req.method = "INVALID";
+		req.vProtocol = "INVALID";
+		req.uri[0] = '\0';
+		return req;
+    }
+
+O parse request basicamente está montando um descritor da requisicao
+
+res.method;  Se GET ou POST
+res.uri url que esta tentando acessar
+res.vProtocol; Protocolo HTTP
+
+Sabendo isso vamos pra segun
+
 - Implementar sendRes()
 - Implementar OPTIONS em sendRes()
+- Atualizar LEIAME com instruções
 
 
 
