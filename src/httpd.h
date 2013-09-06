@@ -53,11 +53,11 @@ typedef struct {
 	char *fileName;
 } response;
 
-int readSocket(char buffer[], int tam, int connfd);
+int readLine(char *buffer, int sizeBuffer, int connfd);
 
 request parseRequest(char buffer[]);
 
-int sendResponse(request req, response res, int connfd);
+int sendResponse(request req, response res, int connfd, char *linePost);
 
 int sendFile(request req, response res, int connfd);
 
@@ -66,3 +66,7 @@ int sendHeader(int connfd, request req, response res, char *msgStatus, char *mim
 char *identifyMimeType(char *name);
 
 int sendErrorMessage(int status, request req, response res, char *message, int connfd);
+
+int sendPostMessage(request req, response res, int connfd, char *linePost);
+
+char *getLastLineRead(char *buffer);
