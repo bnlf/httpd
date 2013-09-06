@@ -99,24 +99,6 @@ void httpd(int connfd) {
 
 }
 
-int readLine(char *buffer, int sizeBuffer, int connfd){
-
-	int i = 0;
-	char c;
-
-	while(i < sizeBuffer && read(connfd, &c, 1) > 0){
-		if(c == '\r') continue;
-		else if(c == '\n') break;
-		else buffer[i++] = c;
-	}
-
-	buffer[i]= '\0';
-
-	printf("[%s]\n", buffer);
-
-	return ++i;
-}
-
 request parseRequest(char buffer[]) {
 	char *ptr = buffer;
 	char method[MAXLINE], uri[MAXLINE], vProtocol[MAXLINE];
