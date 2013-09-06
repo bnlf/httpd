@@ -53,20 +53,68 @@ typedef struct {
 	char *fileName;
 } response;
 
-int readLine(char *buffer, int sizeBuffer, int connfd);
-
+/**
+* Parse do request do cliente
+* @buffer Recebe dados do socket
+* Monta estrutura do request de acordo com a requisicao do usuario
+* 
+*/
 request parseRequest(char buffer[]);
 
+/**
+* Envia resposta de acordo com o request e responses ja montados
+* @req estrutura do request do usuario
+* @res estrutura da resposta
+* @connfd socket
+* @linePost somente para POST. Parametros
+* 
+*/
 int sendResponse(request req, response res, int connfd, char *linePost);
 
+/*
+* Envia resposta com headers e html pedido
+* @req estrutura do requesst
+* @res estrutura do response
+* @connfd socket
+*/
 int sendFile(request req, response res, int connfd);
 
+/*
+* Envia header
+* @req estrutura do requesst
+* @res estrutura do response
+* @msgStatus status do retornoß
+* @mimeType tipo de arquivo
+* @connfd socket
+*/
 int sendHeader(int connfd, request req, response res, char *msgStatus, char *mimeType);
 
+/*
+* Identifica tipo de arquivo pela extensao
+* @name nome do arquivo
+*/
 char *identifyMimeType(char *name);
 
+/*
+* Envia html de error
+* @status status da requisicao
+* @res estrutura do request
+* @req estrutura do response
+* @message mensagem de erro
+* @connfd socket
+*/
 int sendErrorMessage(int status, request req, response res, char *message, int connfd);
 
+/*
+* Envia POST
+* @req estrutura do requesst
+* @res estrutura do response
+* @linePost Parametros do Post
+* @connfd socket
+*/
 int sendPostMessage(request req, response res, int connfd, char *linePost);
 
+/*
+* Pega ultima linha do request
+*/
 char *getLastLineRead(char *buffer);
