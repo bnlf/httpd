@@ -61,4 +61,4 @@ ha suporte para o protocolo.
 Descricao
 ==============
 
-Ver arquivo http.h para descritores das funcoes 
+Ver arquivo src/httpd.h para descritores das funcoes 
